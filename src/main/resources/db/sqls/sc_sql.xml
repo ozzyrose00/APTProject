@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="sc">
+	<!--db접속 테스트 -->
+    <insert id="sche010ins" parameterClass="HashMap">
+		<selectKey resultClass="String" keyProperty="_sch_id"> 
+			SELECT 
+			    TO_CHAR(SYSDATE, 'YYYYMMDD') || TRIM(TO_CHAR(NVL(SUBSTR(MAX(sch_id), 9, 7), 0) + 1, '00000'))		
+			FROM sch_info																								
+			WHERE apt_id=#dia_apt_id#
+	    </selectKey>
+		insert into sch_info 
+			(apt_id,sch_id,sch_title,sch_content,sch_start_dt,
+			 sch_end_dt,sch_complete_yn,cre_dt)
+		values(
+			 #dia_apt_id#,#_sch_id#,#dia_sch_title#,#dia_sch_content#,replace(#dia_sch_start_dt#,'-',''),
+			 replace(#dia_sch_end_dt#,'-',''),#dia_sch_complete_yn#,sysdate		
+		)
+	</insert>
+	
+	
+	<select id="sche010l" parameterClass="hashMap" resultClass="hashMap">
+		select 
+			apt_id,sch_id,sch_title,sch_content,FMT('D',sch_start_dt) as sch_start_dt,
+			FMT('D',sch_end_dt) as sch_end_dt,sch_complete_yn,cre_dt,sch_approve_yn
+		from sch_info
+		where sch_start_dt like sch_start_dt||'%'
+		and sch_end_dt like sch_end_dt||'%'
+	</select>
+
+	<select id="sche010r" parameterClass="hashMap" resultClass="hashMap">
+		select 
+			apt_id,sch_id,sch_title,sch_content,FMT('D',sch_start_dt) as sch_start_dt,
+			FMT('D',sch_end_dt) as sch_end_dt,sch_complete_yn,cre_dt,sch_approve_yn
+		from sch_info
+		where apt_id=#apt_id#
+		and sch_id=#sch_id#
+	</select>
+	
+	<delete id="sche010d" parameterClass="hashMap">
+		delete from sch_info where apt_id=#dia_apt_id# and sch_id=#dia_sch_id#
+	</delete>
+	
+	<update id="sche010u" parameterClass="hashMap">
+		update sch_info set
+			 sch_title = #dia_sch_title#,
+			 sch_content = #dia_sch_content#,
+			 sch_start_dt = replace(#dia_sch_start_dt#,'-',''),
+			 sch_end_dt = replace(#dia_sch_end_dt#,'-',''),
+			 sch_complete_yn = #dia_sch_complete_yn#,	
+			 sch_approve_yn = #dia_sch_approve_yn#	
+		where apt_id=#dia_apt_id# and sch_id=#dia_sch_id# 		
+	</update>
+	
+	
+</sqlMap>

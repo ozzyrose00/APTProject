@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:mvc="http://www.springframework.org/schema/mvc"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:dwr="http://www.directwebremoting.org/schema/spring-dwr"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                http://www.springframework.org/schema/context 
+                http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                http://www.springframework.org/schema/mvc 
+                http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+                http://www.directwebremoting.org/schema/spring-dwr
+   				http://www.directwebremoting.org/schema/spring-dwr-3.0.xsd"
+   				>
+   				
+	<context:component-scan base-package="com.oz.aptproject.web.service"></context:component-scan>
+	
+	<!-- service -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="Altibase.jdbc.driver.AltibaseDriver"></property>
+		<property name="url"  value="jdbc:Altibase://1.214.152.218:20300/mine_reg"></property>
+		<!-- <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+		<property name="url"  value="jdbc:log4jdbc:Altibase://1.214.152.218:20300/mine_reg"></property> -->
+		<property name="username" value="apt" ></property>
+		<property name="password"  value="apt"></property>
+	</bean>
+	
+	 <!-- IBATIS 전자정부프레임워크에서는 class가 다르다 -->
+	<bean id="sqlMapClient" class="egovframework.rte.psl.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:/db/ibatis-config.xml" />
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>	 
+	
+	 <!-- IBATIS 전자정부프레임워크에서는 class가 다르다 -->
+	<bean id="sqlMapClientTemplate" class="egovframework.rte.psl.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<!-- DWR Setting -->
+	<dwr:controller id="dwrController" debug="true">
+		<dwr:config-param name="crossDomainSessionSecurity" value="false" />
+	</dwr:controller>
+
+	<bean id="handlerMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="alwaysUseFullPath" value="true"></property>
+		<property name="mappings">
+			<props>
+				<prop key="/enjine.js">dwrController</prop>
+				<prop key="/utils.js">dwrController</prop>
+				<prop key="/interface/**">dwrController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="DwrHelper" class="com.oz.aptproject.web.service.DwrHelper">
+		<dwr:remote javascript="DwrHelper"></dwr:remote>
+	</bean>
+	<!-- DWR Set-->			
+	
+   		
+</beans>   				

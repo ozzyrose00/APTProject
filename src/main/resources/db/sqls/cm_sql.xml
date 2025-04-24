@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="cm">
+	
+	<insert id="cmei010ins" parameterClass="hashMap">
+		<selectKey resultClass="String" keyProperty="_event_id"> 
+			SELECT 
+			    TO_CHAR(SYSDATE, 'YYYYMMDD') || TRIM(TO_CHAR(NVL(SUBSTR(MAX(apt_id), 9, 7), 0) + 1, '00000'))		
+			FROM apt_event_info																								
+			WHERE event_id BETWEEN TO_CHAR(SYSDATE, 'YYYYMMDD') || '00000' AND TO_CHAR(SYSDATE, 'YYYYMMDD') || '99999'
+	    </selectKey>	
+		insert into apt_event_info 
+			(apt_id,event_id,event_nm,event_type,event_start_dt,
+			 event_end_dt,apply_start_dt,apply_end_dt,
+			 cre_dt,upd_dt)
+		values(
+			 #apt_id#,#_event_id#,#event_nm#,#event_type#,replace(#event_start_dt#,'-',''),
+			 replace(#event_end_dt#,'-',''),replace(#apply_start_dt#,'-',''),replace(#apply_end_dt#,'-',''),
+			 sysdate,#upd_dt#		
+		)
+	</insert>
+	
+	<select id="cmei010l" parameterClass="hashMap" resultClass="hashMap">
+		select 
+			apt_id,		event_id,	event_nm,	event_type,   GET_CD_NM('A1',event_type) as event_type_nm,	
+			FMT('D',event_start_dt) as event_start_dt,
+			FMT('D',event_end_dt) as event_end_dt, 
+			FMT('D',apply_start_dt) as apply_start_dt,	
+			FMT('D',apply_end_dt) as apply_end_dt,	
+			apply_end_yn,	
+			cre_dt,
+			upd_dt
+		from apt_event_info
+		where 1=1
+		<isNotEmpty property='apt_id'>
+			and apt_id = #apt_id#
+		</isNotEmpty>
+	</select>
+	
+	
+	<select id="cmei010l_tcnt" parameterClass="HashMap" resultClass="int">
+		select 
+			count(*) as cnt
+		from apt_event_info		
+		where 1=1
+		<isNotEmpty property='apt_id'>
+			and apt_id = #apt_id#
+		</isNotEmpty>			
+	</select>	
+	
+	
+	<update id="cmei010u" parameterClass="hashMap">
+		update apt_event_info set
+			event_nm = #event_nm#
+			,event_type = #event_type#
+			,event_start_dt = replace(#event_start_dt#,'-','')
+			,event_end_dt = replace(#event_end_dt#,'-','')
+			,apply_start_dt = replace(#apply_start_dt#,'-','')
+			,apply_end_dt = replace(#apply_end_dt#,'-','')
+			,apply_end_yn = #apply_end_yn#
+			,upd_dt = sysdate
+		where apt_id = #apt_id#
+		and event_id = #event_id#
+	</update>
+	
+	<delete id="cmei010d" parameterClass="hashMap">
+		delete from apt_event_info
+		where apt_id = #apt_id#
+		and event_id = #event_id#		
+	</delete>
+	
+	<insert id="cmai010ins" parameterClass="hashMap">
+		<selectKey resultClass="String" keyProperty="_apply_id"> 
+			SELECT 
+			    TO_CHAR(SYSDATE, 'YYYYMMDD') || TRIM(TO_CHAR(NVL(SUBSTR(MAX(apply_id), 9, 7), 0) + 1, '00000'))		
+			FROM apt_event_apply_info																								
+			WHERE apt_id=#apt_id# and event_id=#event_id#
+	    </selectKey>	
+		insert into apt_event_apply_info 
+			(
+				apt_id,		event_id,	apply_id,	dong,	ho,
+				nm,		tel1,		tel2,		tel3,	apply_cnt,
+				win_yn,		cre_dt			
+			)
+		values(
+				#apt_id#,		#event_id#,	#_apply_id#,	#dong#,	#ho#,
+				#nm#,			#tel1#,		#tel2#,			#tel3#,	#apply_cnt#,
+				#win_yn#,		sysdate	
+		)
+	</insert>	
+	
+<select id="cmai010l" parameterClass="hashMap" resultClass="hashMap">
+		select 
+		    apt_id,		event_id,	apply_id, dong, ho, nm , tel1||'-'||tel2||'-'||tel3 as tel,
+		    tel1,       tel2,       tel3,       apply_cnt,  win_yn,     
+		    to_char(cre_dt,'YYYY-MM-DD') as cre_dt
+		from APT_EVENT_APPLY_INFO
+		where 1=1
+		<isNotEmpty property='apt_id'>
+			and apt_id = #apt_id#
+		</isNotEmpty>
+		<isNotEmpty property='event_id'>
+			and event_id = #event_id#
+		</isNotEmpty>
+		<isNotEmpty property='win_yn'>
+			and win_yn = #win_yn#
+		</isNotEmpty>
+	</select>
+	
+	
+	<select id="cmai010l_tcnt" parameterClass="HashMap" resultClass="int">
+		select 
+		    count(*) as cnt
+		from APT_EVENT_APPLY_INFO
+		where 1=1
+		<isNotEmpty property='apt_id'>
+			and apt_id = #apt_id#
+		</isNotEmpty>
+		<isNotEmpty property='event_id'>
+			and event_id = #event_id#
+		</isNotEmpty>
+		<isNotEmpty property='win_yn'>
+			and win_yn = #win_yn#
+		</isNotEmpty>					
+	</select>	
+	
+	<update id="cmai010u" parameterClass="hashMap">
+		update APT_EVENT_APPLY_INFO set
+		    dong = #dong#, 
+		    ho = #ho#, 
+		    nm = #nm# , 
+		    tel1 = #tel1#,
+		    tel2 = #tel2#,       
+		    tel3 = #tel3#,       
+		    apply_cnt = #apply_cnt#,  
+		    win_yn = #win_yn#,     
+		    upd_dt = sysdate
+		where 1=1
+		and apt_id = #apt_id#
+		and event_id = #event_id#
+		and apply_id = #apply_id#
+	</update>
+	
+	<delete id="cmai010d" parameterClass="hashMap">
+		delete APT_EVENT_APPLY_INFO 
+		where 1=1
+		and apt_id = #apt_id#
+		and event_id = #event_id#
+		and apply_id = #apply_id#		 
+	</delete>
+	
+	<update id="apt_event_apply_info_win_yn_upd" parameterClass="hashMap">
+		update APT_EVENT_APPLY_INFO set
+		    win_yn = #win_yn#    
+		where 1=1
+		and apt_id = #apt_id#
+		and event_id = #event_id#
+		and apply_id = #apply_id# 
+	</update>
+	
+	
+</sqlMap>

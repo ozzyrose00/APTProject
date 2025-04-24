@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="test">
+
+	<sql id="pg_h">
+		SELECT * FROM 
+		( SELECT XYZ.*, ROWNUM as ROW_NO,count(*) over() - ROWNUM + 1 as RN
+		FROM(
+	</sql>
+	
+	<sql id="pg_f">
+		) 
+		XYZ 
+		) 
+		WHERE ROW_NO > (#page# - 1) * 10
+    	AND ROW_NO &lt;= #page# * 10
+	</sql>  
+
+	<!--db접속 테스트 -->
+	<select id="won_totalCount" resultClass="String">
+	     select '1234' from dual
+    </select>
+    
+    <!-- resultClass - Integer 등 1개의 value형을 return 받을 때 사용 -->
+	<select id="boardlist" resultClass="HashMap">
+		<include refid="test.pg_h"/>
+	     select 
+			seq_no,data_no,name,passwd,brd_id,
+			title,srch_cnt,make_ymd,file_nm,
+			url,vno,egroup,depth	     
+	     from board
+	     order by seq_no desc
+		<include refid="test.pg_f"/>
+    </select>
+
+	<select id="boardlist_tcnt" resultClass="int">
+		select count(*) from board
+    </select>
+    
+    <select id="noticelist" parameterClass="map" resultClass="HashMap">
+		select * From 
+		(
+			select row_number() over(order by regdate desc) as num, *
+			From notice
+		)
+		where num between 1+($page$-1)*10 and $page$*10
+		<isNotEmpty property="query">
+			and $field$ like '%'||#query#||'%'
+		</isNotEmpty>
+    </select>        
+
+    <select id="noticelistCnt" parameterClass="map" resultClass="Integer">
+		select count(*) as cnt 
+		from notice
+		where 1=1
+		<isNotEmpty property="query">
+			and $field$ like '%'||#query#||'%'
+		</isNotEmpty>		
+    </select>   
+    
+    <select id="noticedetail" parameterClass="map" resultClass="HashMap">
+    	select * From notice 
+    	where id = #id#
+    </select>    
+    
+    <select id="loginInfo"  parameterClass="map" resultClass="HashMap">
+    	select * from usr
+    	where usr_id = #usr_id# and usr_pw = #usr_pw#
+    </select>
+
+    <select id="comclacdLst"  parameterClass="map" resultClass="HashMap">
+    	select com_cla_cd,com_cd,com_cd_nm
+    	from COM_CD_INFO
+    	where 1=1
+    	<isNotEmpty property="com_cla_cd">
+    	and com_cla_cd = #com_cla_cd#
+    	</isNotEmpty> 
+    	and use_yn = 'Y'
+    </select>
+          
+</sqlMap>

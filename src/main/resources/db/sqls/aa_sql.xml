@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="aa">
+	<!--db접속 테스트 -->
+    <insert id="aaAi011i" parameterClass="HashMap">
+		<selectKey resultClass="String" keyProperty="_apt_id"> 
+			SELECT 
+			    TO_CHAR(SYSDATE, 'YYYYMMDD') || TRIM(TO_CHAR(NVL(SUBSTR(MAX(apt_id), 9, 7), 0) + 1, '00000'))		
+			FROM apt_info																								
+			WHERE apt_id BETWEEN TO_CHAR(SYSDATE, 'YYYYMMDD') || '00000' AND TO_CHAR(SYSDATE, 'YYYYMMDD') || '99999'
+	    </selectKey>
+	     
+		INSERT INTO apt_info ( 
+			apt_id,			apt_nm,			apt_zip_no,			apt_addr_dtl,			cre_id,
+			cre_dt
+		) VALUES (
+			#_apt_id#,   #apt_nm#,     #apt_zip_no#,    #apt_addr_dtl#,    #_s_usr_id#,
+			sysdate
+		)
+	</insert>
+	
+	<select id="aaAi010l" parameterClass="HashMap" resultClass="HashMap">
+		select * from apt_info
+		where 1=1
+		<isNotEmpty property = "apt_nm">
+			and apt_nm = #apt_nm#
+		</isNotEmpty>	
+	</select>
+
+	<select id="aaAi010l_tcnt" parameterClass="HashMap" resultClass="int">
+		select count(*) from apt_info	
+		where 1=1
+		<isNotEmpty property = "apt_nm">
+			and apt_nm = #apt_nm#
+		</isNotEmpty>			
+	</select>
+	
+	<insert id="aaar010ins" parameterClass="hashMap">
+		insert into APT_RESI_INFO 
+			(apt_id,	dong,	ho,	nm,	resi_type,
+			 tel1,	tel2,	tel3,	etc,	mvi_dt,
+			 mvo_dt,	cre_dt, 
+			 own_nm, own_tel1, own_tel2, own_tel3)
+		values(
+			 #apt_id#,	#dong#,	#ho#,	#nm#,	#resi_type#,
+			 #tel1#,	#tel2#,	#tel3#,	#etc#,	replace(#mvi_dt#,'-',''),
+			 replace(#mvo_dt#,'-',''),	sysdate,
+			 #own_nm#, #own_tel1#, #own_tel2#, #own_tel3#		
+		)
+	</insert>	
+	
+	<update id="aaar010upd" parameterClass="hashMap">
+		update APT_RESI_INFO set
+			nm = #nm#,	
+			resi_type = #resi_type#,
+			tel1 = #tel1#,	
+			tel2 = #tel2#,	
+			tel3 = #tel3#,	
+			etc = #etc#,	
+			mvi_dt = replace(#mvi_dt#,'-',''),
+			mvo_dt = replace(#mvo_dt#,'-',''),
+			own_nm = #own_nm#, 
+			own_tel1 = #own_tel1#, 
+			own_tel2 = #own_tel2#, 
+			own_tel3 = #own_tel3#
+ 		where apt_id = #apt_id#
+		and dong = #dong#
+		and ho = #ho#
+	</update>
+
+	<insert id="aaar010hins" parameterClass="hashMap">
+		<selectKey resultClass="int" keyProperty="_rank_no"> 
+			SELECT 
+			    nvl(max(rank_no),0)+1
+			FROM APT_RESI_INFO_HIS																								
+			WHERE apt_id=#apt_id# and dong=#dong# and ho=#ho#
+	    </selectKey>	
+		insert into APT_RESI_INFO_HIS 
+			(apt_id,	dong,	ho,	nm,	resi_type,
+			 tel1,	tel2,	tel3,	etc,	mvi_dt,
+			 mvo_dt,	cre_dt, rank_no, cud_gbn,
+			 own_nm, own_tel1, own_tel2, own_tel3)
+		values(
+			 #apt_id#,	#dong#,	#ho#,	#nm#,	#resi_type#,
+			 #tel1#,	#tel2#,	#tel3#,	#etc#,	replace(#mvi_dt#,'-',''),
+			 replace(#mvo_dt#,'-',''),	sysdate,$_rank_no$, #cud_gbn#,
+			 #own_nm#, #own_tel1#, #own_tel2#, #own_tel3#		
+		)
+	</insert>
+	
+	<delete id="aaar010_1d" parameterClass="HashMap">
+		delete from APT_RESI_INFO
+		where 1=1
+		and apt_id = #apt_id#
+		and dong = #dong#
+		and ho = #ho#
+	</delete>
+	
+	<delete id="aaar010del" parameterClass="HashMap">
+		delete from APT_RESI_INFO
+		where 1=1
+		and apt_id = #apt_id#
+		and dong = #dong#
+		and ho = #ho#
+	</delete>	
+	
+	<select id="aaar010_1l" parameterClass="HashMap" resultClass="HashMap">
+		select 
+			apt_id,	dong,	ho,	nm,	resi_type,
+			get_cd_nm('A3',resi_type) as resi_type_nm,  tel1,tel2,tel3,
+			tel1||'-'||tel2||'-'||tel3 as tel ,	etc, 
+			fmt('D',mvi_dt) as mvi_dt,fmt('D',mvo_dt) as mvo_dt,cre_dt,
+			own_nm, own_tel1, own_tel2, own_tel3
+		from APT_RESI_INFO
+		where 1=1
+		<isNotEmpty property = "apt_id">
+			and apt_id = #apt_id#
+		</isNotEmpty>	
+		<isNotEmpty property = "dong">
+			and dong = #dong#
+		</isNotEmpty>	
+		<isNotEmpty property = "ho">
+			and ho = #ho#
+		</isNotEmpty>	
+		<isNotEmpty property = "nm">
+			and nm = #nm#
+		</isNotEmpty>	
+		<isNotEmpty property = "resi_type">
+			and resi_type = #resi_type#
+		</isNotEmpty>	
+		<isNotEmpty property = "tel">
+			and tel1||tel2||tel3 like '%'||tel||'%'
+		</isNotEmpty>	
+		<isNotEmpty property = "s_mvi_dt">
+			and replace(mvi_dt,'-','') between replace(#s_mvi_dt#,'-','') and replace(#e_mvi_dt#,'-','')
+		</isNotEmpty>	
+		<isNotEmpty property = "s_mvo_dt">
+			and replace(mvo_dt,'-','') between replace(#s_mvo_dt#,'-','') and replace(#e_mvo_dt#,'-','')
+		</isNotEmpty>	
+	</select>
+
+	<select id="aaar010_1l_tcnt" parameterClass="HashMap" resultClass="int">
+		select count(*) from APT_RESI_INFO	
+		where 1=1
+		<isNotEmpty property = "apt_id">
+			and apt_id = #apt_id#
+		</isNotEmpty>	
+		<isNotEmpty property = "dong">
+			and dong = #dong#
+		</isNotEmpty>	
+		<isNotEmpty property = "ho">
+			and ho = #ho#
+		</isNotEmpty>	
+		<isNotEmpty property = "nm">
+			and nm = #nm#
+		</isNotEmpty>	
+		<isNotEmpty property = "resi_type">
+			and resi_type = #resi_type#
+		</isNotEmpty>	
+		<isNotEmpty property = "tel">
+			and tel1||tel2||tel3 like '%'||tel||'%'
+		</isNotEmpty>	
+		<isNotEmpty property = "s_mvi_dt">
+			and replace(mvi_dt,'-','') between replace(#s_mvi_dt#,'-','') and replace(#e_mvi_dt#,'-','')
+		</isNotEmpty>	
+		<isNotEmpty property = "s_mvo_dt">
+			and replace(mvo_dt,'-','') between replace(#s_mvo_dt#,'-','') and replace(#e_mvo_dt#,'-','')
+		</isNotEmpty>			
+	</select>
+
+	<select id="aaar010_2l" parameterClass="HashMap" resultClass="HashMap">
+		select 
+			apt_id,	dong,	ho,	nm,	resi_type,
+			get_cd_nm('A3',resi_type) as resi_type_nm,  tel1,tel2,tel3,
+			tel1||'-'||tel2||'-'||tel3 as tel ,	etc, rank_no,
+			fmt('D',mvi_dt) as mvi_dt,fmt('D',mvo_dt) as mvo_dt,cre_dt, cud_gbn,
+			own_nm, own_tel1, own_tel2, own_tel3
+		from APT_RESI_INFO_HIS
+		where 1=1
+		<isNotEmpty property = "apt_id">
+			and apt_id = #apt_id#
+		</isNotEmpty>	
+		<isNotEmpty property = "dong">
+			and dong = #dong#
+		</isNotEmpty>	
+		<isNotEmpty property = "ho">
+			and ho = #ho#
+		</isNotEmpty>	
+		order by apt_id asc, rank_no desc
+	</select>
+
+	<select id="aaar010_2l_tcnt" parameterClass="HashMap" resultClass="int">
+		select count(*) from APT_RESI_INFO_HIS	
+		where 1=1
+		<isNotEmpty property = "apt_id">
+			and apt_id = #apt_id#
+		</isNotEmpty>	
+		<isNotEmpty property = "dong">
+			and dong = #dong#
+		</isNotEmpty>	
+		<isNotEmpty property = "ho">
+			and ho = #ho#
+		</isNotEmpty>	
+	</select>
+			
+	
+</sqlMap>

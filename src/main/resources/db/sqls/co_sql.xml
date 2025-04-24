@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="co">
+	<!--db접속 테스트 -->
+	<select id="cocd010_1l" parameterClass="hashMap" resultClass="hashMap">
+		select * from com_cla_cd_info
+		where 1=1
+		<isNotEmpty property="com_cla_cd">
+			and com_cla_cd = #com_cla_cd#
+		</isNotEmpty>
+		<isNotEmpty property="use_yn">
+			and use_yn = #use_yn#
+		</isNotEmpty>
+	</select>
+
+	<select id="cocd010_1l_tcnt" parameterClass="hashMap" resultClass="int">
+		select count(*) as cnt from com_cla_cd_info
+		where 1=1
+		<isNotEmpty property="com_cla_cd">
+			and com_cla_cd = #com_cla_cd#
+		</isNotEmpty>
+		<isNotEmpty property="use_yn">
+			and use_yn = #use_yn#
+		</isNotEmpty>		
+	</select>
+
+	<select id="cocd010_2l" parameterClass="hashMap" resultClass="hashMap">
+		select * from com_cd_info
+		where 1=1
+		<isNotEmpty property="com_cla_cd">
+			and com_cla_cd = #com_cla_cd#
+		</isNotEmpty>
+		<isNotEmpty property="com_cd">
+			and com_cd = #com_cd#
+		</isNotEmpty>
+	</select>
+
+	<select id="cocd010_2l_tcnt" parameterClass="hashMap" resultClass="int">
+		select count(*) as cnt from com_cd_info
+		where 1=1
+		<isNotEmpty property="com_cla_cd">
+			and com_cla_cd = #com_cla_cd#
+		</isNotEmpty>
+		<isNotEmpty property="com_cd">
+			and com_cd = #com_cd#
+		</isNotEmpty>
+	</select>
+	
+	<update id="cocd010_1u" parameterClass="hashMap">
+		update com_cla_cd_info set
+			com_cla_cd_nm = #com_cla_cd_nm#,
+			use_yn = #use_yn#
+		where com_cla_cd = #com_cla_cd#			
+	</update>
+	
+	<insert id="cocd010_1i" parameterClass="hashMap">
+		insert into com_cla_cd_info values(
+			#com_cla_cd#,#com_cla_cd_nm#,#use_yn#
+		)
+	</insert>
+
+	
+	<delete id="cocd010_1d" parameterClass="hashMap">
+		delete from com_cla_cd_info where com_cla_cd = #com_cla_cd#
+	</delete>
+	
+	<insert id="cocd010_2i" parameterClass="hashMap">
+		insert into COM_CD_INFO values(
+			#com_cla_cd#,#com_cd#,#com_cd_nm#,#use_yn#
+		)
+	</insert>
+	
+	<update id="cocd010_2u" parameterClass="hashMap">
+		update COM_CD_INFO set
+			com_cd_nm = #com_cd_nm#,
+			use_yn = #use_yn#
+		where com_cla_cd = #com_cla_cd#	
+		and com_cd = #com_cd#		
+	</update>	
+	
+	<delete id="cocd010_2d" parameterClass="hashMap">
+		delete from COM_CD_INFO where com_cla_cd = #com_cla_cd#	and com_cd = #com_cd#
+	</delete>	
+	
+		
+</sqlMap>
