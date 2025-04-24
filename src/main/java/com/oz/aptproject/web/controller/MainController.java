@@ -49,6 +49,10 @@ public class MainController extends ActionHelper {
 	@RequestMapping("/test")
 	public String test() {
 		System.out.println("test");
+		System.out.println("test");
+		System.out.println("test");
+		System.out.println("test");
+		System.out.println("test");
 		return "test";  
 	}
 	
